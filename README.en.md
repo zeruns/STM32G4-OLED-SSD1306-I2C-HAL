@@ -1,6 +1,6 @@
 # STM32 based OLED screen driver with software or hardware I2C support (HAL library)
 
-**0.96" OLED display driver based on [STM32](https://blog.zeruns.tech/tag/stm32/) G474 (4-pin [I2C](https://blog.zeruns.tech/tag/I2C/) interface), supports hardware IIC/software IIC , HAL library version.**
+**0.96" OLED(SSD1306) display driver based on [STM32](https://blog.zeruns.tech/tag/stm32/) G474 (4-pin [I2C](https://blog.zeruns.tech/tag/I2C/) interface), supports hardware IIC/software IIC , HAL library version.**
 
 **This driver is more complete, it can realize content display of English, integer, floating point, Chinese characters, images, binary numbers, hexadecimal numbers, etc. It can draw points, straight lines, rectangles, circles, ellipses, triangles, etc., and support multiple fonts, almost equivalent to a simple version of the [Graphics Library](https://blog.zeruns.tech/tag/图形库/).**
 
