@@ -21,7 +21,7 @@
 /*
  * 本程序由zeruns二次修改
  * 修改内容：	从标准库版改成HAL库版，增加支持硬件I2C，可通过修改宏定义来选择是否启用硬件I2C
- * 修改日期：	2024.3.15
+ * 修改日期：	2024.3.16
  * 博客：		https://blog.zeruns.tech
  * B站主页：	https://space.bilibili.com/8320520
 */
@@ -51,9 +51,11 @@
 
 /*STM32G474芯片的硬件I2C3: PA8 -- SCL; PC9 -- SDA */
 
+#ifdef OLED_USE_HW_I2C
 /*I2C接口，定义OLED屏使用哪个I2C接口*/
-#define OLED_I2C     hi2c3
-extern I2C_HandleTypeDef hi2c3;	//HAL库使用，指定硬件IIC接口
+#define OLED_I2C            hi2c3
+extern  I2C_HandleTypeDef   hi2c3;	//HAL库使用，指定硬件IIC接口
+#endif
 
 /*OLED从机地址*/
 #define OLED_ADDRESS 0x3C << 1	// 0x3C是OLED的7位地址，左移1位最后位做读写位变成0x78
