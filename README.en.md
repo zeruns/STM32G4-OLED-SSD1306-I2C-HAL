@@ -1,22 +1,22 @@
-# 基于STM32的OLED屏驱动程序，支持软件或硬件I2C（HAL库）
+# STM32 based OLED screen driver with software or hardware I2C support (HAL library)
 
-**基于[STM32](https://blog.zeruns.tech/tag/stm32/)G474的0.96寸OLED显示屏驱动程序（4针脚[I2C](https://blog.zeruns.tech/tag/I2C/)接口），支持硬件IIC/软件IIC，HAL库版。**
+**0.96" OLED display driver based on [STM32](https://blog.zeruns.tech/tag/stm32/) G474 (4-pin [I2C](https://blog.zeruns.tech/tag/I2C/) interface), supports hardware IIC/software IIC , HAL library version.**
 
-**这款驱动程序比较完善，可以实现 英文、整数、浮点数、汉字、图像、二进制数、十六进制数 等内容显示，可以画点、直线、矩形、圆、椭圆、三角形等，支持多种字体，差不多相当于一个简易版[图形库](https://blog.zeruns.tech/tag/图形库/)了。**
+**This driver is more complete, it can realize content display of English, integer, floating point, Chinese characters, images, binary numbers, hexadecimal numbers, etc. It can draw points, straight lines, rectangles, circles, ellipses, triangles, etc., and support multiple fonts, almost equivalent to a simple version of the [Graphics Library](https://blog.zeruns.tech/tag/图形库/).**
 
-该程序是基于江协科技的代码二次修改的，原版程序是基于STM32F103的，且只支持软件I2C，我修改后支持硬件I2C，也可以修改宏定义改成使用软件I2C。
+The program is based on the secondary modification of the code of Jiangxie Technology, the original program is based on STM32F103, and only supports software I2C, I modified to support hardware I2C, you can also modify the macro definition to change to use software I2C.
 
-测试硬件为NUCLEO-G474RE开发板
+Test hardware for the NUCLEO-G474RE development board
 
-关于OLED的驱动原理，以及驱动程序的使用教程可以看江协科技的视频：[https://url.zeruns.tech/L7j6y](https://www.bilibili.com/video/BV1EN41177Pc)
+About the OLED driver principle, as well as the use of driver tutorials can see the video of Jiangxie Technology: [https://url.zeruns.tech/L7j6y](https://www.bilibili.com/video/BV1EN41177Pc)
 
-- STM32使用硬件I2C读取SHTC3温湿度传感器：[https://blog.zeruns.tech/archives/692.html](https://blog.zeruns.tech/archives/692.html)
-- 移植好U8g2图形库的STM32F407标准库工程模板：[https://blog.zeruns.tech/archives/722.html](https://blog.zeruns.tech/archives/722.html)
-- 基于STM32F1的0.96寸OLED显示屏驱动程序，支持硬件/软件I2C：[https://blog.zeruns.tech/archives/769.html](https://blog.zeruns.tech/archives/769.html)
+- STM32 using hardware I2C to read SHTC3 temperature and humidity sensor: [https://blog.zeruns.tech/archives/692.html](https://blog.zeruns.tech/archives/692.html)
+- STM32F407 standard library project template with U8g2 graphics library ported: [https://blog.zeruns.tech/archives/722.html](https://blog.zeruns.tech/archives/722.html)
+- STM32F1 based 0.96" OLED display driver with hardware/software I2C support: [https://blog.zeruns.tech/archives/769.html](https://blog.zeruns.tech/archives/769.html)
 
-电子/单片机技术交流群：[820537762](https://qm.qq.com/q/ZmTfBbFM4Y)
+Electronic / microcontroller technology exchange group: [820537762](https://qm.qq.com/q/ZmTfBbFM4Y)
 
-## 效果图
+## rendering
 
 ![](https://tc2.zeruns.tech/2024/03/17/1710612830448.gif)
 
@@ -25,68 +25,67 @@
 ![](https://tc2.zeruns.tech/2024/03/17/IMG_20240317_022008.jpeg)
 
 
+## Introduction to I2C Protocol
 
-## I2C协议简介
+I2C communication protocol (Inter-Integrated Circuit) was developed by Phiilps, because it has fewer pins, simple hardware implementation, strong scalability, and does not require external transceiver devices (those level conversion chips) such as USART, CAN and other communication protocols, it is now widely used in the system of multiple Nowadays, it is widely used in the communication between multiple integrated circuits (ICs) in a system.
 
-I2C 通讯协议(Inter－Integrated Circuit)是由 Phiilps 公司开发的，由于它引脚少，硬件实现简单，可扩展性强，不需要 USART、CAN 等通讯协议的外部收发设备（那些电平转化芯片），现在被广泛地使用在系统内多个集成电路(IC)间的通讯。
+I2C has only one data bus SDA (Serial Data Line), serial data bus, can only send data one by one, belongs to the serial communication, half-duplex communication.
 
-I2C只有一跟数据总线 SDA(Serial Data Line)，串行数据总线，只能一位一位的发送数据，属于串行通信，采用半双工通信。
+Half-duplex communication: can be realized in both directions of communication, but not in both directions at the same time, you must take turns to alternate, in fact, can also be understood as a kind of switching direction of simplex communication, the same time must only be a direction of transmission, only a data line.
 
-半双工通信：可以实现双向的通信，但不能在两个方向上同时进行，必须轮流交替进行，其实也可以理解成一种可以切换方向的单工通信，同一时刻必须只能一个方向传输，只需一根数据线。
+For the I2C communication protocol is divided into physical layer and protocol layer physical layer provides for the communication system with mechanical and electronic functions of the characteristics of the part (hardware), to ensure that the original data transmission in the physical media. The protocol layer specifies the communication logic and standardizes the data packetization and unpacketization criteria for both senders and receivers (software level).
 
-对于I2C通讯协议把它分为物理层和协议层物理层规定通讯系统中具有机械、电子功能部分的特性（硬件部分），确保原始数据在物理媒体的传输。协议层主要规定通讯逻辑，统一收发双方的数据打包、解包标准（软件层面）。
+## I2C Physical Layer
 
-## I2C物理层
-
-**I2C 通讯设备之间的常用连接方式**
+**Commonly used connection between I2C communication devices**
 
 ![](https://tc.zeruns.tech/images/2022/11/03/image.png)
 
-(1) 它是一个支持多设备的总线。“总线”指多个设备共用的信号线。在一个 I2C 通讯总线中，可连接多个 I2C 通讯设备，支持多个通讯主机及多个通讯从机。
+(1) It is a bus that supports multiple devices. The term "bus" refers to a signal line shared by multiple devices. Multiple I2C communication devices can be connected to one I2C communication bus, supporting multiple communication masters and multiple communication slaves.
 
-(2) 一个 I2C 总线只使用两条总线线路，一条双向串行数据线SDA（Serial Data Line ），一条串行时钟线SCL（Serial Clock Line ）。数据线即用来表示数据，时钟线用于数据收发同步
+(2) An I2C bus uses only two bus lines, a bi-directional serial data line SDA (Serial Data Line) and a serial clock line SCL (Serial Clock Line). Data line that is used to indicate the data, the clock line is used to send and receive data synchronization
 
-(3) 总线通过上拉电阻接到电源。**当 I2C 设备空闲时会输出高阻态**，而当所有设备都空闲，都输出高阻态时，**由上拉电阻把总线拉成高电平**。
+(3) The bus is connected to the power supply through a pull-up resistor. ** when the I2C device is idle will output a high resistance **, and when all devices are idle, all output a high resistance, ** by the pull-up resistor to pull the bus to a high level **.
 
-I2C通信时单片机GPIO口必须设置为开漏输出，否则可能会造成短路。
+The microcontroller GPIO port must be set to open-drain output for I2C communication, otherwise it may cause a short circuit.
 
-关于更多STM32的I2C相关信息和使用方法可以看这篇文章：[https://url.zeruns.tech/JC0Ah](https://url.zeruns.tech/JC0Ah)
+For more I2C related information and usage of STM32 you can see this article: [https://url.zeruns.tech/JC0Ah](https://url.zeruns.tech/JC0Ah)
 
-还有江协科技的STM32入门教程：[https://www.bilibili.com/video/BV1th411z7sn?p=31](https://url.zeruns.tech/1zvY1)
+There is also the STM32 Getting Started Tutorial from Jiangxie Technology: [https://www.bilibili.com/video/BV1th411z7sn?p=31](https://url.zeruns.tech/1zvY1)
 
-我这里就不详细讲解了。
+I won't go into detail here.
 
-## 使用说明
+## Instructions for use
 
-工程使用Keil5创建，用Vscode+EIDE开发，两个软件都可以打开此工程。
+The project is created with Keil5 and developed with Vscode+EIDE, both software can open this project.
 
-工程文件全部使用UTF-8编码，如果打开显示乱码需要修改编辑器编码为UTF-8。
+All project files are encoded in UTF-8, if you open them, you need to change the editor code to UTF-8.
 
-### 硬件I2C
+### Hardware I2C
 
-STM32CubeMX配置，找到你要用的I2C外设的引脚，并设置引脚功能为SCL和SDA，如下图所示是I2C3的SCL。
+STM32CubeMX configuration, find the pin of the I2C peripheral you want to use, and set the pin function to SCL and SDA, the following picture shows the SCL of I2C3.
 
 ![](https://tc2.zeruns.tech/2024/03/17/image-20240317002450658.png)
 
-接着配置I2C外设，启用对应的I2C外设，速度模式设置为 `Fast Mode Plus`，速度改成 1000，其他默认就行。
+Next, configure the I2C peripheral, enable the corresponding I2C peripheral, set the speed mode to `Fast Mode Plus`, change the speed to 1000, and other defaults will work.
 
 ![](https://tc2.zeruns.tech/2024/03/17/I2C829c2d4769742895.png)
 
-配置GPIO，上面设置完后会自动把那两个引脚配置为复用开漏输出模式，接着只需要把IO输出速度改成 `Very High` ，还有GPIO标签(User Label)定义分别改成`I2C3_SCL`和`I2C3_SDA`就行，如果是用的别的I2C也可以设置成别的值，代码对应处要修改一下。改完后点击生成代码。
+Configure GPIO, after the above setting, it will automatically configure those two pins as multiplexed open-drain output mode, then you only need to change the IO output speed to `Very High`, and the definition of GPIO label (User Label) to `I2C3_SCL` and `I2C3_SDA` respectively, on the line, if you are using other I2C, you can also set it to other values, the code should be modified at the corresponding place. If you are using other I2C, you can set it to other values, and change the code in the corresponding place. After changing the code, click Generate Code.
 
 ![](https://tc2.zeruns.tech/2024/03/17/I2C_GPIO.png)
 
-OLED.c文件里，将 `#define OLED_USE_SW_I2C` 注释掉，将 `#define OLED_USE_HW_I2C` 取消注释，如果你用的是别的引脚作为I2C引脚，并且定义了别的名字那就将代码里的 `I2C3_SCL` 和 `I2C3_SDA` 也改一下。
+In the OLED.c file, comment out `#define OLED_USE_SW_I2C`, uncomment `#define OLED_USE_HW_I2C`, and change `I2C3_SCL` and `I2C3_SDA` in the code if you are using other I2C pins and have defined other names.
 
 ![](https://tc2.zeruns.tech/2024/03/17/image-20240317003414458.png)
 
-### 软件I2C
+### Software I2C
 
-STM32CubeMX配置，设置两个引脚作为I2C的SCL和SDA信号线，修改IO口的 `User Lable` 分别为`I2C3_SCL`和`I2C3_SDA`，如果改成别的需要到代码里修改一下，IO模式设置为开漏输出，默认输出电平高电平，上拉输出，速度设置到最高，如下图所示。改为后点击生成代码。
+STM32CubeMX configuration, set two pins as SCL and SDA signal lines of I2C, modify the `User Lable` of IO port to `I2C3_SCL` and `I2C3_SDA` respectively, if you change it to something else, you need to change it in the code, the IO mode is set to open-drain output, the default output level is high, the output level of pull-up is high and the speed is set to the highest. The following figure shows. Click Generate Code after change.
 
 ![](https://tc2.zeruns.tech/2024/03/17/I2C.png)
 
-OLED.c文件里，将 `#define OLED_USE_HW_I2C` 注释掉，将 `#define OLED_USE_SW_I2C` 取消注释，如果你用的是别的引脚作为I2C引脚，并且定义了别的名字那就将代码里的 `I2C3_SCL` 和 `I2C3_SDA` 也改一下。
+In the OLED.c file, comment out `#define OLED_USE_HW_I2C`, uncomment `#define OLED_USE_SW_I2C`, and change `I2C3_SCL` and `I2C3_SDA` in the code if you use other pins as I2C pins and define other names.
 
 ![](https://tc2.zeruns.tech/2024/03/17/image-20240317001749175_bebe48917fc7a6d9e041be6ae5177659.png)
 
